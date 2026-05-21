@@ -18,15 +18,24 @@ MCP (Model Context Protocol) server for the **[Prom.ua](https://prom.ua)** marke
 
 ### 1. Get your API token
 
-1. Log in to [my.prom.ua](https://my.prom.ua)
-2. Go to **Settings → API Tokens** (Налаштування → API токени)
-3. Click **Create token** — give it a name (e.g. `claude-mcp`) and select these permissions:
-   - **Orders** — Read + Write (for listing and updating order statuses)
-   - **Products** — Read + Write (for listing and editing products)
-   - **Messages** — Read + Write (for reading chats and sending replies)
-4. Click **Save** and then **Copy** the generated token immediately — it is shown only once
+> ⚠️ The API token section is only available in the **seller's company cabinet**, not the buyer's personal account. Make sure you are logged in as a seller.
 
-> ⚠️ Store the token securely (e.g. in a password manager). If you lose it, you'll need to generate a new one.
+
+1. Log in to [my.prom.ua](https://my.prom.ua) and open your **company cabinet** (кабінет компанії). If you see "Кабінет покупця" in the URL (`/cabinet/user/...`), you are in the wrong place — look for a company switcher in the top menu or go to [my.prom.ua/](https://my.prom.ua/) directly after logging in as a seller.
+2. Go to **Налаштування → Управління API-токенами** (Settings → Manage API tokens).
+3. Fill in the form:
+   - **Назва** — give it a name, e.g. `claude-mcp`
+   - **Дійсний до** — expiry date (maximum 1 year)
+   - **Доступ** — enable at minimum:
+     - **Замовлення (Orders)** — Read + Write
+     - **Товари (Products)** — Read + Write
+     - **Повідомлення (Messages)** — Read + Write
+4. Click **Створити токен** (Create token)
+5. The token appears in the list below — click **Дивитись → Скопіювати**. It is shown only once, so copy it immediately.
+
+> 💡 Official Prom.ua guide: [support.prom.ua → Управління API-токенами](https://support.prom.ua/hc/uk/articles/360020350478)
+>
+> ⚠️ Store the token securely (e.g. in a password manager). If you lose it, you will need to generate a new one.
 
 ---
 

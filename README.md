@@ -19,42 +19,106 @@ MCP (Model Context Protocol) server for the **[Prom.ua](https://prom.ua)** marke
 ### 1. Get your API token
 
 1. Log in to [my.prom.ua](https://my.prom.ua)
-2. Go to **Settings → API Tokens**
-3. Create a new token with the required permissions
-4. Copy the token
+2. Go to **Settings → API Tokens** (Налаштування → API токени)
+3. Click **Create token** — give it a name (e.g. `claude-mcp`) and select these permissions:
+   - **Orders** — Read + Write (for listing and updating order statuses)
+   - **Products** — Read + Write (for listing and editing products)
+   - **Messages** — Read + Write (for reading chats and sending replies)
+4. Click **Save** and then **Copy** the generated token immediately — it is shown only once
 
-### 2. Install
+> ⚠️ Store the token securely (e.g. in a password manager). If you lose it, you'll need to generate a new one.
+
+---
+
+### 2. Install and build
+
+**Prerequisites:** Node.js 18 or newer. Check with `node --version`.
 
 ```bash
+# Clone the repository
+git clone https://github.com/dimagord/mcp-prom-ua.git
+cd mcp-prom-ua
+
+# Install dependencies
 npm install
+
+# Build the server (compiles TypeScript → dist/index.js)
 npm run build
 ```
 
+After a successful build you'll see `dist/index.js` created. Note the full path to this file — you'll need it in the next step.
+
+```bash
+# Example: get the full path
+pwd
+# e.g. /Users/yourname/projects/mcp-prom-ua
+# → full path to server: /Users/yourname/projects/mcp-prom-ua/dist/index.js
+```
+
+---
+
 ### 3. Configure Claude Desktop
 
-Add to `~/.config/claude/claude_desktop_config.json` (macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`):
+Claude Desktop reads its MCP server list from a JSON config file. Open it in a text editor:
+
+| OS | Config file location |
+|----|---------------------|
+| **macOS** | `~/Library/Application Support/Claude/claude_desktop_config.json` |
+| **Windows** | `%APPDATA%\Claude\claude_desktop_config.json` |
+| **Linux** | `~/.config/claude/claude_desktop_config.json` |
+
+**If the file doesn't exist yet**, create it. If it already exists and has other MCP servers configured, add the `prom-ua` block inside the existing `mcpServers` object.
+
+Add the following configuration, replacing the placeholder values:
 
 ```json
 {
   "mcpServers": {
     "prom-ua": {
       "command": "node",
-      "args": ["/path/to/prom-ua-mcp-server/dist/index.js"],
+      "args": ["/full/path/to/mcp-prom-ua/dist/index.js"],
       "env": {
-        "PROM_API_TOKEN": "your_token_here"
+        "PROM_API_TOKEN": "your_prom_api_token_here"
       }
     }
   }
 }
 ```
 
-### 4. Run via HTTP (optional)
+**Real example (macOS):**
+```json
+{
+  "mcpServers": {
+    "prom-ua": {
+      "command": "node",
+      "args": ["/Users/dmytro/projects/mcp-prom-ua/dist/index.js"],
+      "env": {
+        "PROM_API_TOKEN": "a1b2c3d4e5f6..."
+      }
+    }
+  }
+}
+```
+
+**After saving the file:**
+1. Fully quit Claude Desktop (not just close the window — use the system tray / menu bar icon → Quit)
+2. Reopen Claude Desktop
+3. Start a new conversation — you should see a 🔌 plug icon or a tools indicator showing `prom-ua` is connected
+4. Test it by typing: `Show me my last 5 orders on Prom.ua`
+
+> **Troubleshooting:** If the server doesn't appear, open Claude Desktop → Settings → Developer → MCP Servers to see error logs. Most common issues: wrong file path, token typo, or Node.js not found (`command: "node"` requires Node.js to be in PATH).
+
+---
+
+### 4. Run via HTTP (optional, for advanced use)
+
+If you want to expose the server over HTTP (e.g. for use with other MCP clients or remote access):
 
 ```bash
 PROM_API_TOKEN=your_token TRANSPORT=http PORT=3000 node dist/index.js
 ```
 
-Then use `http://localhost:3000/mcp` as your MCP endpoint.
+The server will start at `http://localhost:3000/mcp`. Health check: `http://localhost:3000/health`.
 
 ---
 
@@ -63,8 +127,8 @@ Then use `http://localhost:3000/mcp` as your MCP endpoint.
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
 | `PROM_API_TOKEN` | ✅ Yes | — | Your Prom.ua API Bearer token |
-| `TRANSPORT` | No | `stdio` | `stdio` or `http` |
-| `PORT` | No | `3000` | HTTP server port (when TRANSPORT=http) |
+| `TRANSPORT` | No | `stdio` | `stdio` (for Claude Desktop) or `http` |
+| `PORT` | No | `3000` | HTTP server port (only when `TRANSPORT=http`) |
 
 ---
 
@@ -75,7 +139,7 @@ Then use `http://localhost:3000/mcp` as your MCP endpoint.
 #### `prom_list_orders`
 List orders with optional filters.
 - `limit` — max 100 (default 20)
-- `date_from` / `date_to` — ISO date strings
+- `date_from` / `date_to` — ISO date strings, e.g. `"2024-01-15"`
 - `status` — `pending | received | delivered | canceled | draft | paid`
 
 #### `prom_get_order`

@@ -91,7 +91,7 @@ Add the following configuration, replacing the placeholder values:
   "mcpServers": {
     "prom-ua": {
       "command": "node",
-      "args": ["/Users/dmytro/projects/mcp-prom-ua/dist/index.js"],
+      "args": ["/Users/username/projects/mcp-prom-ua/dist/index.js"],
       "env": {
         "PROM_API_TOKEN": "a1b2c3d4e5f6..."
       }
